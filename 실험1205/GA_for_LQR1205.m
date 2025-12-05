@@ -16,8 +16,8 @@ lb = [1,    10,   0,   0,   0.1];
 ub = [500, 1000,  5,   5,   10];
 
 options = gaoptimset( ...
-    'PopulationSize', 100, ...   % 필요하면 줄여도 됨
-    'Generations',    50, ...
+    'PopulationSize', 1000, ...   % 필요하면 줄여도 됨
+    'Generations',    100, ...
     'Display',        'iter', ...
     'PlotFcns',       @gaplotbestf ...
 );
@@ -25,6 +25,8 @@ options = gaoptimset( ...
 %% 2. GA 실행 ---------------------------------------------------------------
 fprintf('최적화를 시작합니다...\n');
 [x_best, fval] = ga(@lqr_cost_standup, nVars, [], [], [], [], lb, ub, [], options);
+
+
 
 %% 3. 최적 값 출력 ----------------------------------------------------------
 fprintf('\n================================================\n');
@@ -103,19 +105,19 @@ function J = lqr_cost_standup(param)
 
     % ------------ 시뮬레이션 설정 ------------
     dt = 0.002;          % 시뮬레이션 time step [s]
-    T  = 2.5;            % 전체 시뮬레이션 시간 [s]
+    T  = 10;            % 전체 시뮬레이션 시간 [s]
     N  = round(T/dt);
 
-    Vmax = 10;           % 실제 Q-servo 전압 제한 (±10V 가정, 다르면 수정)
+    Vmax = 14;           % 실제 Q-servo 전압 제한 (±10V 가정, 다르면 수정)
 
     % 속도 추정기(LPF) 설정: G(s) = wc / (s + wc)
     wc = 50;             % rad/s  (Simulink Transfer Fcn의 50/(s+50)과 통일)
     a  = exp(-wc*dt);    % 이산화했을 때 계수 (대략적인 근사)
 
     % ------------ 초기 상태 ------------
-    % 손으로 inverted 근처로 올려놨다고 가정 (예: 8도 정도 오차)
+    % 손으로 inverted 근처로 올려놨다고 가정 (예: 3도 정도 오차)
     theta0 = 0;
-    alpha0 = deg2rad(8);   % pendulum angle error
+    alpha0 = deg2rad(3);   % pendulum angle error
     x_true = [theta0; alpha0; 0; 0];
 
     % 측정 상태 (각도는 바로, 속도는 LPF로 추정)
